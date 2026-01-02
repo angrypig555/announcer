@@ -1,12 +1,13 @@
 import os
 import sys
 import argparse
-from rapidfuzz import process
+import string
+from rapidfuzz import process, fuzz
 from pydub import AudioSegment
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="TTS for the HL1 announcer using rapidfuzzing"
+        description="TTS for the HL1 announcer using rapidfuzz"
     )
 
     parser.add_argument(
@@ -41,9 +42,10 @@ available_words = [
 ]
 
 def closest_match(word):
-    if word in available_words:
-        return word
-    match, score, _ = process.extractOne(word, available_words)
+    clean = word.lower().strip(string.punctuation)
+    if clean in available_words:
+        return clean
+    match, score, _ = process.extractOne(clean, available_words, scorer=fuzz.ratio)
     print("word had to be replaced, new word: " +  match)
     return match if score > 70 else None
 
